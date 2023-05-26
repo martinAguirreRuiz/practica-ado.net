@@ -53,10 +53,6 @@ namespace negocio
             {
                 datos.cerrarConexion();
             }
-
-
-
-
         }
         public void agregarPokemon(Pokemon nuevo)
         {
@@ -64,7 +60,7 @@ namespace negocio
 
             try
             {
-                datos.setearConsulta("Insert into POKEMONS (Numero, Nombre, Descripcion, UrlImagen, IdTipo, IdDebilidad) values (@Numero, @Nombre, @Descripcion, @UrlImagen, @IdTipo, @IdDebilidad)");
+                datos.setearConsulta("Insert into POKEMONS (Numero, Nombre, Descripcion, UrlImagen, IdTipo, IdDebilidad, Activo) values (@Numero, @Nombre, @Descripcion, @UrlImagen, @IdTipo, @IdDebilidad, 1)");
                 datos.setearParametro("@Numero", nuevo.Numero);
                 datos.setearParametro("@Nombre", nuevo.Nombre);
                 datos.setearParametro("@Descripcion", nuevo.Descripcion);
@@ -141,6 +137,97 @@ namespace negocio
             {
 
                 throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+        public List<Pokemon> filtrarPokemon(string campo, string criterio, string filtro)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            List<Pokemon> listaFiltrada = new List<Pokemon>();
+            try
+            {
+                string consulta = "Select P.Id, Numero, Nombre, P.Descripcion, UrlImagen, T.Descripcion Tipo, D.Descripcion Debilidad, T.Id IdTipo, D.Id IdDebilidad from POKEMONS P, ELEMENTOS T, ELEMENTOS D where P.IdTipo = T.Id and P.IdDebilidad = D.Id and P.Activo = 1 and ";
+                if (campo == "Número")
+                {
+                    if (criterio == "Mayor a")
+                    {
+                        consulta += "Numero > @Filtro";
+                    }
+                    else if (criterio == "Menor a")
+                    {
+                        consulta += "Numero < @Filtro";
+                    }
+                    else
+                    {
+                        consulta += "Numero = @Filtro";
+
+                    }
+                }
+                else if (campo == "Nombre")
+                {
+                    if (criterio == "Comienza con")
+                    {
+                        consulta += "Nombre like '" + filtro + "%'";
+                    }
+                    else if (criterio == "Termina con")
+                    {
+                        consulta += "Nombre like '%" + filtro + "'";
+                    }
+                    else
+                    {
+                        consulta += "Nombre like '%" + filtro + "%'";
+                    }
+                }
+                else
+                {
+                    if (criterio == "Comienza con")
+                    {
+                        consulta += "P.Descripcion like '" + filtro + "%'";
+                    }
+                    else if (criterio == "Termina con")
+                    {
+                        consulta += "P.Descripcion like '%" + filtro + "'";
+                    }
+                    else
+                    {
+                        consulta += "P.Descripcion like '%" + filtro + "%'";
+                    }
+                }
+
+                datos.setearConsulta(consulta);
+                datos.setearParametro("@Filtro", filtro);
+                datos.ejecutarLectura();
+                while (datos.Lector.Read())
+                {
+                    Pokemon aux = new Pokemon();
+
+                    aux.Id = (int)datos.Lector["Id"];
+                    aux.Numero = (int)datos.Lector["Numero"];
+                    aux.Nombre = (string)datos.Lector["Nombre"];
+                    aux.Descripcion = (string)datos.Lector["Descripcion"];
+
+                    if (!(datos.Lector["UrlImagen"] is DBNull))
+                    {
+                        aux.UrlImagen = (string)datos.Lector["UrlImagen"];
+                    }
+
+                    aux.Tipo = new Elemento();
+                    aux.Tipo.Descripcion = (string)datos.Lector["Tipo"];
+                    aux.Tipo.Id = (int)datos.Lector["IdTipo"];
+                    aux.Debilidad = new Elemento();
+                    aux.Debilidad.Descripcion = (string)datos.Lector["Debilidad"];
+                    aux.Debilidad.Id = (int)datos.Lector["IdDebilidad"];
+
+                    listaFiltrada.Add(aux);
+                }
+                return listaFiltrada;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
             finally
             {
