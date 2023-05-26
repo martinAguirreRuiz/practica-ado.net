@@ -45,6 +45,14 @@ namespace main
             frmModifica.ShowDialog();
             cargar();
         }
+        private void btnEliminarFisico_Click(object sender, EventArgs e)
+        {
+            eliminar();
+        }
+        private void btnEliminarLogico_Click(object sender, EventArgs e)
+        {
+            eliminar(true);
+        }
 
         //FUNCIONES QUE NO SON EVENTOS 
         public void cargarImagen(string imagen)
@@ -66,6 +74,40 @@ namespace main
             dgvPokemons.Columns["UrlImagen"].Visible = false;
             dgvPokemons.Columns["Id"].Visible = false;
             cargarImagen(listaPokemons[0].UrlImagen);
+        }
+        public void eliminar(bool logico = false)
+        {
+            PokemonNegocio negocio = new PokemonNegocio();
+            Pokemon seleccionado;
+            try
+            {
+                if (!logico)
+                {
+                    DialogResult resultado = MessageBox.Show("Estás seguro que quieres eliminar el pokemon permanentemente?", "Borrar Pokemon", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+
+                    if (resultado == DialogResult.Yes)
+                    {
+                    seleccionado = (Pokemon)dgvPokemons.CurrentRow.DataBoundItem;
+                    negocio.eliminarFisico(seleccionado.Id);
+                    cargar();
+                    }
+                }
+                else
+                {
+                    DialogResult resultado = MessageBox.Show("Estás seguro que quieres deshabilitar el pokemon?", "Borrar Pokemon", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+                    if (resultado == DialogResult.Yes)
+                    {
+                        seleccionado = (Pokemon)dgvPokemons.CurrentRow.DataBoundItem;
+                        negocio.eliminarLogico(seleccionado.Id);
+                        cargar();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
     }
