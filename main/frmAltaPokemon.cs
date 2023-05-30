@@ -5,16 +5,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace main
 {
     public partial class frmAltaPokemon : Form
     {
-        Pokemon poke = null;
+        private Pokemon poke = null;
+        private OpenFileDialog archivo = null;
 
         public frmAltaPokemon()
         {
@@ -90,12 +93,16 @@ namespace main
                     MessageBox.Show("Pokemon agregado exitosamente!");
                 }
 
+                if (archivo != null && !(archivo.FileName.ToLower().Contains("http")))
+                {
+                    File.Copy(archivo.FileName, ConfigurationManager.AppSettings["Imagenes-Pokemon"] + archivo.SafeFileName);
+                }
+
                 this.Close();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                ex.ToString();
             }
 
         }
@@ -103,6 +110,18 @@ namespace main
         private void txtUrlImagen_TextChanged(object sender, EventArgs e)
         {
             cargarImagen(txtUrlImagen.Text);
+        }
+        private void btnCargarImagen_Click(object sender, EventArgs e)
+        {
+            archivo = new OpenFileDialog();
+            archivo.Filter = "jpg|*.jpg|png|*.png";
+            
+            if (archivo.ShowDialog() == DialogResult.OK)
+            {
+                txtUrlImagen.Text = archivo.FileName;
+                cargarImagen(archivo.FileName);
+            }
+
         }
 
 
@@ -118,5 +137,6 @@ namespace main
                 pbPokemons.Load("https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/681px-Placeholder_view_vector.svg.png");
             }
         }
+
     }
 }

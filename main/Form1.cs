@@ -100,7 +100,20 @@ namespace main
             string campo = cboCampo.Text;
             string criterio = cboCriterio.Text;
             string filtro = txtFiltro.Text;
-            dgvPokemons.DataSource = negocio.filtrarPokemon(campo, criterio, filtro);
+
+            if (cboCampo.Text == "Número")
+            {
+                if (validarSoloNumeros(txtFiltro.Text))
+                {
+                    dgvPokemons.DataSource = negocio.filtrarPokemon(campo, criterio, filtro);
+                }
+            }
+            else
+            {
+                dgvPokemons.DataSource = negocio.filtrarPokemon(campo, criterio, filtro);
+            }
+
+
 
         }
 
@@ -163,6 +176,16 @@ namespace main
                 throw;
             }
         }
-
+        public bool validarSoloNumeros(string texto)
+        {
+            foreach (char caracter in texto)
+            {
+                if (!(char.IsNumber(caracter)))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
